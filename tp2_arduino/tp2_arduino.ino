@@ -6,8 +6,8 @@
 
 int cont; // Contador de pulsos
 float Tw=0.1; // Tiempo de ventana
-float vel=0; // Velocidad del motor
-float vel_anterior=0;
+int vel=0; // Velocidad del motor
+int vel_anterior=0;
 int ppv=20; // Pulsos por vuelta
 float Kp=0;
 float Kd=0;
@@ -15,6 +15,8 @@ float Ki=0;
 int N=10;
 float Pk, Ik, Dk;
 float uk;
+int pwm;
+int ref;
 bool interrupt_on=false;
 
 void setup() 
@@ -85,7 +87,7 @@ void recibir_trama() // Envio de datos de la PC al Arduino
 void enviar_trama() // Envio de datos del Arduino a la PC
 { 
   
-  float trama[12];
+  uint8_t trama[12];
   
   trama[0]='e';
   trama[1]='f';
