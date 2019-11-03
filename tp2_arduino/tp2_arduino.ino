@@ -2,6 +2,7 @@
 
 #define PIN_PWM 5
 #define PIN_INTERRUPT 2
+
 // Defino variables globales:
 
 int cont; // Contador de pulsos
@@ -15,7 +16,7 @@ float Ki=0;
 int N=10;
 float Pk, Ik, Dk;
 float uk;
-int pwm;
+int pwm_;
 int ref;
 bool interrupt_on=false;
 
@@ -24,24 +25,25 @@ void setup()
   Serial.begin(115200);
   pinMode(PIN_PWM,OUTPUT); // Seteo el pin 5 como salida PWM
   pinMode(PIN_INTERRUPT,INPUT); // Seteo el pin 2 para interrupciones
- // digitalWrite(2,HIGH); // Escribe un valor alto (5V) en el pin 2
   attachInterrupt(digitalPinToInterrupt(PIN_INTERRUPT),contador_pulsos,CHANGE); // Configuro la interrupción del pin 2 para que cuente los pulsos
-  Timer1.initialize(Tw*1e6); // Esta función toma us como argumento
+                                                                                // CHANGE to trigger the interrupt whenever the pin changes value
+  Timer1.initialize(Tw*1e6); // Inicializo timer. Esta función toma us como argumento
   Timer1.attachInterrupt(calcular_velocidad); // Activo la interrupción y la asocio a calcular_velocidad
 }
 
 void loop() 
 {
-  if(Serial.available() > 0)
+  if(Serial.available() > 0) // send data only when you receive data.
   {
     recibir_trama();
   }
   if(interrupt_on==true)
   {
     interrupt_on=false;
-    pwm=pid();
+    pwm_=pid();
     enviar_trama();
   }
+  analogWrite(PIN_PWM,pwm_); // Ajusta el valor del PWM
 }
 
 void contador_pulsos() // Función que cuenta los pulsos cuando salta la interrupción
@@ -98,7 +100,7 @@ void enviar_trama() // Envio de datos del Arduino a la PC
   trama[6]=Ki;
   trama[7]=highByte(ref);
   trama[8]=lowByte(ref);
-  trama[9]=pwm;
+  trama[9]=pwm_;
   trama[10]=highByte(vel);
   trama[11]=lowByte(vel);  
 
