@@ -1,14 +1,14 @@
 #include <TimerOne.h> // Libreria para usar el objeto Timer1
 
 #define PIN_PWM 5
-#define PIN_INTERRUPT
+#define PIN_INTERRUPT 2
 // Defino variables globales:
 
 int cont; // Contador de pulsos
 float Tw=0.1; // Tiempo de ventana
 float vel=0; // Velocidad del motor
 float vel_anterior=0;
-int ppv=20 // Pulsos por vuelta
+int ppv=20; // Pulsos por vuelta
 float Kp=0;
 float Kd=0;
 float Ki=0;
@@ -58,6 +58,7 @@ void recibir_trama() // Envio de datos de la PC al Arduino
   char h_trama[4];
   char header_recibido[4];
   char datos_recibidos[6];
+  int ref_high, ref_low;
   
   h_trama[0]='a';
   h_trama[1]='b';
@@ -76,15 +77,9 @@ void recibir_trama() // Envio de datos de la PC al Arduino
     Ki=datos_recibidos[2];
     ref_high=datos_recibidos[3];
     ref_low=datos_recibidos[4];
+    
     N=datos_recibidos[5];
   }
-  
-  trama[4]=Kp;
-  trama[5]=Kd;
-  trama[6]=Ki;
-  trama[7]=highByte(ref);
-  trama[8]=lowByte(ref);
-  trama[9]=N;    
 }
 
 void enviar_trama() // Envio de datos del Arduino a la PC
@@ -118,6 +113,10 @@ float pid()
   Dk =  (gamma/gamma+Tw)*Dk-(Kp*Kd)/(gamma+Tw)*(vel-vel_anterior);
   vel_anterior=vel;
   uk=Pk+Ik+Dk;
+  if(uk>255)
+    uk=255;
+  else if(uk<0)
+    uk=0;
 
   return uk;
   
