@@ -2,12 +2,13 @@
 
 #define PIN_PWM 5
 #define PIN_INTERRUPT 2
+
 // Defino variables globales:
 
 int cont; // Contador de pulsos
 float Tw=0.1; // Tiempo de ventana
-float vel=0; // Velocidad del motor
-float vel_anterior=0;
+int vel=0; // Velocidad del motor
+int vel_anterior=0;
 int ppv=20; // Pulsos por vuelta
 float Kp=0;
 float Kd=0;
@@ -15,35 +16,34 @@ float Ki=0;
 int N=10;
 float Pk, Ik, Dk;
 float uk;
-float pwm;
-bool interrupt_on=false;
-int ref_high, ref_low;
+int pwm_;
 int ref;
-
+bool interrupt_on=false;
 
 void setup() 
 {
   Serial.begin(115200);
   pinMode(PIN_PWM,OUTPUT); // Seteo el pin 5 como salida PWM
   pinMode(PIN_INTERRUPT,INPUT); // Seteo el pin 2 para interrupciones
- // digitalWrite(2,HIGH); // Escribe un valor alto (5V) en el pin 2
   attachInterrupt(digitalPinToInterrupt(PIN_INTERRUPT),contador_pulsos,CHANGE); // Configuro la interrupción del pin 2 para que cuente los pulsos
-  Timer1.initialize(Tw*1e6); // Esta función toma us como argumento
+                                                                                // CHANGE to trigger the interrupt whenever the pin changes value
+  Timer1.initialize(Tw*1e6); // Inicializo timer. Esta función toma us como argumento
   Timer1.attachInterrupt(calcular_velocidad); // Activo la interrupción y la asocio a calcular_velocidad
 }
 
 void loop() 
 {
-  if(Serial.available() > 0)
+  if(Serial.available() > 0) // send data only when you receive data.
   {
     recibir_trama();
   }
   if(interrupt_on==true)
   {
     interrupt_on=false;
-    pwm=pid();
+    pwm_=pid();
     enviar_trama();
   }
+  analogWrite(PIN_PWM,pwm_); // Ajusta el valor del PWM
 }
 
 void contador_pulsos() // Función que cuenta los pulsos cuando salta la interrupción
@@ -62,6 +62,7 @@ void recibir_trama() // Envio de datos de la PC al Arduino
   char h_trama[4];
   char header_recibido[4];
   char datos_recibidos[6];
+  int ref_high, ref_low;
   
   h_trama[0]='a';
   h_trama[1]='b';
@@ -80,8 +81,9 @@ void recibir_trama() // Envio de datos de la PC al Arduino
     Ki=datos_recibidos[2];
     ref_high=datos_recibidos[3];
     ref_low=datos_recibidos[4];
+    
     N=datos_recibidos[5];
-  }  
+  }
 }
 
 void enviar_trama() // Envio de datos del Arduino a la PC
@@ -98,7 +100,7 @@ void enviar_trama() // Envio de datos del Arduino a la PC
   trama[6]=Ki;
   trama[7]=highByte(ref);
   trama[8]=lowByte(ref);
-  trama[9]=pwm;
+  trama[9]=pwm_;
   trama[10]=highByte(vel);
   trama[11]=lowByte(vel);  
 
@@ -115,7 +117,12 @@ float pid()
   Dk =  (gamma/gamma+Tw)*Dk-(Kp*Kd)/(gamma+Tw)*(vel-vel_anterior);
   vel_anterior=vel;
   uk=Pk+Ik+Dk;
+  if(uk>255)
+    uk=255;
+  else if(uk<0)
+    uk=0;
 
   return uk;
   
 }
+
