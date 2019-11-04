@@ -7,17 +7,17 @@
 
 int cont; // Contador de pulsos
 float Tw=0.1; // Tiempo de ventana
-int vel=0; // Velocidad del motor
+uint16_t vel=0; // Velocidad del motor
 int vel_anterior=0;
 int ppv=20; // Pulsos por vuelta
-float Kp=0;
-float Kd=0;
-float Ki=0;
-int N=10;
-float Pk, Ik, Dk;
+uint8_t Kp=0;
+uint8_t Kd=0;
+uint8_t Ki=0;
+uint8_t N=10;
+float Pk, Ik=0, Dk;
 float uk;
-int pwm_;
-int ref;
+uint8_t pwm_;
+uint16_t ref;
 bool interrupt_on=false;
 
 void setup() 
@@ -89,13 +89,13 @@ void recibir_trama() // Envio de datos de la PC al Arduino
 void enviar_trama() // Envio de datos del Arduino a la PC
 { 
   
-  uint8_t trama[12];
+  byte trama[12];
   
   trama[0]='e';
   trama[1]='f';
   trama[2]='g';
   trama[3]='h';
-  trama[4]=Kp;
+  trama[4]=77;
   trama[5]=Kd;
   trama[6]=Ki;
   trama[7]=highByte(ref);
@@ -112,8 +112,7 @@ float pid()
   float gamma=Kd/N;  
   
   Pk = Kp*(ref-vel);
-  //Ik = Ik+Kp*Ki*Tw(ref-vel); // HAY QUE INCLUIR ESTO?? PORQUE EN REALIDAD ES Ik+1=Ik+Kp*Ki*Tw(ref-vel), pero no podemos obtener datos futuros
-  Ik = 0;
+ 
   Dk =  (gamma/gamma+Tw)*Dk-(Kp*Kd)/(gamma+Tw)*(vel-vel_anterior);
   vel_anterior=vel;
   uk=Pk+Ik+Dk;
@@ -121,8 +120,9 @@ float pid()
     uk=255;
   else if(uk<0)
     uk=0;
-
+    
+Ik = Ik+Kp*Ki*Tw*(ref-vel); // HAY QUE INCLUIR ESTO?? PORQUE EN REALIDAD ES Ik+1=Ik+Kp*Ki*Tw(ref-vel), pero no podemos obtener datos futuros
+  //Ik = 0;
   return uk;
   
 }
-
