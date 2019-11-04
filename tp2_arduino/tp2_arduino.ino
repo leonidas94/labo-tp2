@@ -95,7 +95,7 @@ void enviar_trama() // Envio de datos del Arduino a la PC
   trama[1]='f';
   trama[2]='g';
   trama[3]='h';
-  trama[4]=77;
+  trama[4]=Kp1;
   trama[5]=Kd;
   trama[6]=Ki;
   trama[7]=highByte(ref);
