@@ -116,13 +116,14 @@ float pid()
   Dk =  (gamma/gamma+Tw)*Dk-(Kp*Kd)/(gamma+Tw)*(vel-vel_anterior);
   vel_anterior=vel;
   uk=Pk+Ik+Dk;
+  
   if(uk>255)
     uk=255;
   else if(uk<0)
     uk=0;
     
-Ik = Ik+Kp*Ki*Tw*(ref-vel); // HAY QUE INCLUIR ESTO?? PORQUE EN REALIDAD ES Ik+1=Ik+Kp*Ki*Tw(ref-vel), pero no podemos obtener datos futuros
-  //Ik = 0;
+  Ik = Ik+Kp*Ki*Tw*(ref-vel); 
+  
   return uk;
   
 }
