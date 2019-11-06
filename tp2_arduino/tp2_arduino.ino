@@ -7,17 +7,17 @@
 
 int cont; // Contador de pulsos
 float Tw=0.1; // Tiempo de ventana
-uint16_t vel=0; // Velocidad del motor
-int vel_anterior=0;
+int vel=100; // Velocidad del motor
+int vel_anterior=100;
 int ppv=20; // Pulsos por vuelta
-uint8_t Kp=0;
-uint8_t Kd=0;
-uint8_t Ki=0;
+uint8_t Kp=1;
+uint8_t Kd=1;
+uint8_t Ki=1;
 uint8_t N=10;
 float Pk, Ik=0, Dk;
 float uk;
 uint8_t pwm_;
-uint16_t ref;
+int ref=900;
 bool interrupt_on=false;
 
 void setup() 
@@ -39,10 +39,10 @@ void loop()
   }
   if(interrupt_on==true)
   {
-    interrupt_on=false;
-    pwm_=pid();
-    enviar_trama();
-  }
+      interrupt_on=false;
+      pwm_=pid();
+      enviar_trama();
+  } 
   analogWrite(PIN_PWM,pwm_); // Ajusta el valor del PWM
 }
 
@@ -95,7 +95,7 @@ void enviar_trama() // Envio de datos del Arduino a la PC
   trama[1]='f';
   trama[2]='g';
   trama[3]='h';
-  trama[4]=Kp1;
+  trama[4]=Kp;
   trama[5]=Kd;
   trama[6]=Ki;
   trama[7]=highByte(ref);
