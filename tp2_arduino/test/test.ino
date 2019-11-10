@@ -27,5 +27,6 @@ void setup()
 
 void loop() 
 {
+
   analogWrite(PIN_PWM,255); // Ajusta el valor del PWM
 }
