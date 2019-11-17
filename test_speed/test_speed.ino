@@ -1,15 +1,15 @@
 #include <TimerOne.h> // Libreria para usar el objeto Timer1
 
-#define PIN_PWM 5
-#define PIN_INTERRUPT 2
+#define PIN_PWM 9
+#define PIN_INTERRUPT 3
 
 // Defino variables globales:
 
 int cont; // Contador de pulsos
-float Tw=0.1; // Tiempo de ventana
+float Tw=0.005; // Tiempo de ventana
 int vel=100; // Velocidad del motor
 int vel_anterior=100;
-int ppv=20; // Pulsos por vuelta
+int ppv=32; // Pulsos por vuelta
 uint8_t Kp=1;
 uint8_t Kd=1;
 uint8_t Ki=1;
@@ -35,10 +35,15 @@ void loop()
 {
   if(interrupt_on==true)
   {
-    Serial.print("Speed = ");
-    Serial.println(vel); 
+    //Serial.print("Speed = ");
+    
+    //Serial.write(vel);
+
   }
   analogWrite(PIN_PWM,255); // Ajusta el valor del PWM
+    //Serial.write(vel);
+    //Serial.write('\r');
+    Serial.println(vel); 
 }
 
 void contador_pulsos() // Función que cuenta los pulsos cuando salta la interrupción
@@ -47,7 +52,7 @@ void contador_pulsos() // Función que cuenta los pulsos cuando salta la interru
 }
 
 void calcular_velocidad(){
-  vel=(60*cont)/(Tw*ppv); // Hago la conversión a RPM
+  vel=(60*cont)/(Tw*ppv*100); // Hago la conversión a RPM
   cont=0; // Inicializo el contador
   interrupt_on=true;
 }

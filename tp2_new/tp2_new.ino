@@ -48,7 +48,7 @@ void loop()
   if(interrupt_on==true)
   {
       interrupt_on=false;
-      pwm_=pid();
+      pid();
       enviar_trama();
   } 
   analogWrite(PIN_PWM,pwm_); // Ajusta el valor del PWM
@@ -127,7 +127,7 @@ void enviar_trama() // Envio de datos del Arduino a la PC
   Serial.flush(); // Borra buffer
 }
 
-int pid()
+void pid()
 {
   float gamma=Kd/N;  
   
@@ -152,6 +152,6 @@ int pid()
   Serial.println(Ik);
   Serial.println(uk*100/255);
   */
-  return uk*255;
-  
+
+  pwm_=uk*255; 
 }
