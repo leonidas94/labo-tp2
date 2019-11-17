@@ -1,12 +1,11 @@
 #include "Timer.h"
 
-
 #define PIN_PWM 5    // Pin de salida del PWM
 #define PIN_INTERRUPT 2 //Tiene que ser el pin 2 o 3 porque es una interrupcion
 #define CANT_RANURAS 32 //La cantidad de RANURAS del encoder
 #define TW 0.2
 
-Timer t;
+Timer tiempo;
 
 typedef union
 {
@@ -22,7 +21,7 @@ float Pk, Dk, Ik, uk;
 int pwm_=0;
 volatile bool interrupt_on = false;
 int ref=0; //Referencia del controlador
-unsigned long t_anterior=0;
+unsigned long tiempo_anterior=0;
 
 
 void setup() 
@@ -30,9 +29,6 @@ void setup()
   pinMode(PIN_INTERRUPT, INPUT_PULLUP);
   pinMode(PIN_PWM, OUTPUT); 
   Serial.begin(9600);
-//  while (!Serial){
-//    ; // wait for serial port to connect.
-//  }
   
   // Indico que cada vez que se detecte un flanco ascendente por el pin PIN_INTERRUPT,
   // entre a la función contador_pulsos(), la cuál suma un 1 a la variable cont:
@@ -40,13 +36,14 @@ void setup()
 
   // Indico que cada TW*1000=200ms se realice una interrupcion que llame a la
   // función calcular_velocidad():
-  t.every(TW*1000,calcular_velocidad); 
+  tiempo.every(TW*1000,calcular_velocidad); 
 }
 
 
-void loop() {
-    
-  t.update();
+void loop() 
+{    
+  tiempo.update(); // Se llama a update para corroborrar si el intervalo de tiempo especificado termino
+                   // y en caso afirmativo se llama a la función calcular_velocidad()
   if (Serial.available()>0){
     recibir_trama();
   }
@@ -55,7 +52,6 @@ void loop() {
     interrupt_on = false;
     pid();
     enviar_trama();
-    
   }
   analogWrite(PIN_PWM, pwm_);//ajusta el valor del PWM
 }
@@ -68,8 +64,9 @@ void contador_pulsos(){
 
 void calcular_velocidad(){
   interrupt_on = true;
-  vel = ((float)cont*60*1000)/(CANT_RANURAS*(millis()-(t_anterior)));
-  t_anterior = millis();
+  vel = ((float)cont*60*1000)/(CANT_RANURAS*(millis()-(tiempo_anterior)));
+  // millis(): Returns the number of milliseconds passed since the Arduino board began running the current program.
+  tiempo_anterior = millis(); 
   cont = 0; 
 }
 
@@ -97,6 +94,10 @@ void recibir_trama()
   Kd=Kd_aux.number;
   Ki=Ki_aux.number;
   ref=int(ref_aux.number);
+  if(ref>2400)
+    ref=2400;
+  else if(ref<0)
+    ref==0;
   N=int(N_aux.bytes);
 }
 
