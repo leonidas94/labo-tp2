@@ -44,25 +44,30 @@ void loop()
 {    
   tiempo.update(); // Se llama a update para corroborrar si el intervalo de tiempo especificado termino
                    // y en caso afirmativo se llama a la función calcular_velocidad()
-  if (Serial.available()>0){
+  if (Serial.available()>0)
+  {
     recibir_trama();
   }
 
-  if (interrupt_on) {
+  if (interrupt_on==true)
+  {
     interrupt_on = false;
     pid();
     enviar_trama();
   }
-  analogWrite(PIN_PWM, pwm_);//ajusta el valor del PWM
+  
+  analogWrite(PIN_PWM, pwm_); // Envio el valor del pwm al pin correspondiente
 }
 
 
-void contador_pulsos(){
+void contador_pulsos()
+{
   cont++;
 }
 
 
-void calcular_velocidad(){
+void calcular_velocidad()
+{
   interrupt_on = true;
   vel = ((float)cont*60*1000)/(CANT_RANURAS*(millis()-(tiempo_anterior)));
   // millis(): Returns the number of milliseconds passed since the Arduino board began running the current program.
@@ -77,8 +82,8 @@ void recibir_trama()
   char header_recibido[4];
   FLOATUNION_t Kp_aux, Kd_aux, Ki_aux, ref_aux, N_aux;
   
-  Serial.readBytes(header_recibido,4); // Lea el header para saber si comenzo una nueva trama
-  
+  Serial.readBytes(header_recibido,4); // Leo el header para saber si comenzo una nueva trama
+  // Comparo el header con los datos recibidos:
   if(header[0]==header_recibido[0]&&header[1]==header_recibido[1]&&header[2]==header_recibido[2]&&header[3]==header_recibido[3])
   {
     // Leo cada variable recibida
@@ -94,7 +99,7 @@ void recibir_trama()
   Kd=Kd_aux.number;
   Ki=Ki_aux.number;
   ref=int(ref_aux.number);
-  if(ref>2400)
+  if(ref>2400) // Ajusto a este valor la referencia, ya que el motor no alcanza valores mayores
     ref=2400;
   else if(ref<0)
     ref==0;
@@ -104,8 +109,11 @@ void recibir_trama()
 
 void enviar_trama()
 {
-  float pwm_float=float(pwm_)*100/255;
+  // Convierto las variables pwm_ y ref a tipo float, para realizar
+  // operaciones con otras variables de este tipo.
+  float pwm_float=float(pwm_)*100/255; 
   float ref_float=float(ref);
+  
   FLOATUNION_t Kp_aux, Kd_aux, Ki_aux, ref_aux, pwm_aux, vel_aux;
   char header[4]="efgh";
   
@@ -123,7 +131,7 @@ void enviar_trama()
   Serial.write(ref_aux.bytes, 4);
   Serial.write(pwm_aux.bytes, 4);
   Serial.write(vel_aux.bytes, 4);
-  Serial.flush(); //Waits for the transmission of outgoing serial data to complete.
+  Serial.flush(); // Espera a que la transmisión serial de datos este se compelte.
 }
 
 
@@ -133,14 +141,11 @@ void pid()
   Pk = Kp*(ref - vel);
   Dk = (gamma/(gamma + TW))*Dk - (Kp*Kd/(gamma + TW))*(vel-vel_anterior);
   uk = Pk + Ik + Dk;
-  if (uk>1){
+  if (uk>1)
     uk = 1;
-  }
-  else{
-    if (uk<0){
-        uk = 0;
-    }
-  }
+  else if (uk<0)
+    uk = 0;
+
   Ik = Kp*Ki*TW*(ref - vel) + Ik;
   vel_anterior = vel;
   pwm_ = 255*uk;
