@@ -20,8 +20,7 @@ int N=10;
 float Pk=0, Dk=0, Ik=0, uk=0;
 int pwm_=0;
 volatile bool interrupt_on = false;
-int ref=2000; //Referencia del controlador
-unsigned long tiempo_anterior=0;
+int ref=0; //Referencia del controlador
 
 
 void setup() 
@@ -69,11 +68,8 @@ void contador_pulsos()
 
 void calcular_velocidad()
 {
-  interrupt_on = true;
-  //vel = ((float)cont*60*1000)/(CANT_RANURAS*(millis()-(tiempo_anterior)));
+  interrupt_on = true; 
   vel = ((float)cont*60)/(CANT_RANURAS*TW);
-  // millis(): Returns the number of milliseconds passed since the Arduino board began running the current program.
-  tiempo_anterior = millis(); 
   cont = 0; 
 }
 
@@ -101,11 +97,11 @@ void recibir_trama()
   Kd=Kd_aux.number;
   Ki=Ki_aux.number;
   ref=int(ref_aux.number);
-/*  if(ref>2400) // Ajusto a este valor la referencia, ya que el motor no alcanza valores mayores
+  if(ref>2400) // Ajusto a este valor la referencia, ya que el motor no alcanza valores mayores
     ref=2400;
   else if(ref<0)
     ref==0;
-*/
+
   N=int(N_aux.bytes);
 }
 

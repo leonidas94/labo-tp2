@@ -1,28 +1,27 @@
 #include <TimerOne.h> // Libreria para usar el objeto Timer1
 
-#define PIN_PWM 9
-#define PIN_INTERRUPT 3
+#define PIN_PWM 5
+#define PIN_INTERRUPT 2
 
 // Defino variables globales:
 
 int cont; // Contador de pulsos
-float Tw=0.005; // Tiempo de ventana
-int vel=100; // Velocidad del motor
-int vel_anterior=100;
+float Tw=0.01; // Tiempo de ventana
+//int vel=0; // Velocidad del motor
+float vel=0;
 int ppv=32; // Pulsos por vuelta
-uint8_t Kp=1;
-uint8_t Kd=1;
-uint8_t Ki=1;
-uint8_t N=10;
-float Pk, Ik=0, Dk;
-float uk;
-uint8_t pwm_;
-int ref=900;
 bool interrupt_on=false;
+
+typedef union
+{
+  float number;
+  byte bytes[4];
+} FLOATUNION_t;
+
 
 void setup() 
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(PIN_PWM,OUTPUT); // Seteo el pin 5 como salida PWM
   pinMode(PIN_INTERRUPT,INPUT); // Seteo el pin 2 para interrupciones
   attachInterrupt(digitalPinToInterrupt(PIN_INTERRUPT),contador_pulsos,CHANGE); // Configuro la interrupción del pin 2 para que cuente los pulsos
@@ -35,15 +34,11 @@ void loop()
 {
   if(interrupt_on==true)
   {
-    //Serial.print("Speed = ");
-    
-    //Serial.write(vel);
-
+    enviar_trama();
   }
   analogWrite(PIN_PWM,255); // Ajusta el valor del PWM
-    //Serial.write(vel);
-    //Serial.write('\r');
-    Serial.println(vel); 
+//  Serial.println(vel);
+//  delay(Tw);
 }
 
 void contador_pulsos() // Función que cuenta los pulsos cuando salta la interrupción
@@ -52,7 +47,16 @@ void contador_pulsos() // Función que cuenta los pulsos cuando salta la interru
 }
 
 void calcular_velocidad(){
-  vel=(60*cont)/(Tw*ppv*100); // Hago la conversión a RPM
+  vel=(60*cont)/(Tw*ppv); // Hago la conversión a RPM
   cont=0; // Inicializo el contador
   interrupt_on=true;
+}
+
+void enviar_trama()
+{
+  FLOATUNION_t vel_aux;
+  vel_aux.number=vel;
+  
+  Serial.write(vel_aux.bytes, 4);
+  Serial.flush(); // Espera a que la transmisión serial de datos este se compelte.
 }
