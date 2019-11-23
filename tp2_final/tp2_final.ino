@@ -36,7 +36,6 @@ void setup()
   // Indico que cada TW*1000=200ms se realice una interrupcion que llame a la
   // función calcular_velocidad():
   tiempo.every(TW*1000,calcular_velocidad); 
- 
 }
 
 
@@ -74,7 +73,7 @@ void calcular_velocidad()
 }
 
 
-void recibir_trama()
+void recibir_trama() // PC al Arduino
 {
   char header[4]="abcd";
   char header_recibido[4];
@@ -106,7 +105,7 @@ void recibir_trama()
 }
 
 
-void enviar_trama()
+void enviar_trama() // Arduino a la PC
 {
   // Convierto las variables pwm_ y ref a tipo float, para realizar
   // operaciones con otras variables de este tipo.

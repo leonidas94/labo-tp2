@@ -46,7 +46,8 @@ void contador_pulsos() // Función que cuenta los pulsos cuando salta la interru
   cont=cont+1;
 }
 
-void calcular_velocidad(){
+void calcular_velocidad()
+{
   vel=(60*cont)/(Tw*ppv); // Hago la conversión a RPM
   cont=0; // Inicializo el contador
   interrupt_on=true;
@@ -58,5 +59,5 @@ void enviar_trama()
   vel_aux.number=vel;
   
   Serial.write(vel_aux.bytes, 4);
-  Serial.flush(); // Espera a que la transmisión serial de datos este se compelte.
+  Serial.flush(); // Espera a que la transmision serial de datos se complete.
 }
