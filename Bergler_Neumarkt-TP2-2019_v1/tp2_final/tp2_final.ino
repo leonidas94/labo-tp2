@@ -97,7 +97,9 @@ void recibir_trama() // PC al Arduino
   Ki=Ki_aux.number;
   ref=int(ref_aux.number);
   if(ref>2400) // Ajusto a este valor la referencia, ya que el motor no alcanza valores mayores
+  {
     ref=2400;
+  }
   else if(ref<0)
     ref==0;
 
