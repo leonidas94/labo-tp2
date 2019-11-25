@@ -1,5 +1,5 @@
 Tw=0.01;
-ref=4875;
+ref=2000;
 
  for i=1:length(in.signals.values);
      salida(i)=output.signals.values(:,:,i);

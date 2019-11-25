@@ -7,7 +7,6 @@
 
 int cont; // Contador de pulsos
 float Tw=0.01; // Tiempo de ventana
-//int vel=0; // Velocidad del motor
 float vel=0;
 int ppv=32; // Pulsos por vuelta
 bool interrupt_on=false;
@@ -24,7 +23,7 @@ void setup()
   Serial.begin(9600);
   pinMode(PIN_PWM,OUTPUT); // Seteo el pin 5 como salida PWM
   pinMode(PIN_INTERRUPT,INPUT); // Seteo el pin 2 para interrupciones
-  attachInterrupt(digitalPinToInterrupt(PIN_INTERRUPT),contador_pulsos,CHANGE); // Configuro la interrupción del pin 2 para que cuente los pulsos
+  attachInterrupt(digitalPinToInterrupt(PIN_INTERRUPT),contador_pulsos,RISING); // Configuro la interrupción del pin 2 para que cuente los pulsos
                                                                                 // CHANGE to trigger the interrupt whenever the pin changes value
   Timer1.initialize(Tw*1e6); // Inicializo timer. Esta función toma us como argumento
   Timer1.attachInterrupt(calcular_velocidad); // Activo la interrupción y la asocio a calcular_velocidad
